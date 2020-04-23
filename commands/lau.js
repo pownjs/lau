@@ -2,31 +2,141 @@ exports.yargs = {
     command: 'lau <domain>',
     describe: 'List all URLs',
 
-    builder: (yargs) => {},
+    builder: (yargs) => {
+        yargs.options('header', {
+            alias: 'H',
+            type: 'string',
+            describe: 'Custom header'
+        })
+
+        yargs.options('wildcard', {
+            alias: 'w',
+            type: 'string',
+            describe: 'Domain wildcard',
+            default: '*.'
+        })
+
+        yargs.options('retry', {
+            alias: 'r',
+            type: 'number',
+            default: 5
+        })
+
+        yargs.options('timeout', {
+            alias: 't',
+            type: 'number',
+            default: 30000
+        })
+
+        yargs.options('unique', {
+            alias: 'u',
+            type: 'boolean',
+            default: false
+        })
+
+        yargs.options('summary', {
+            alias: 's',
+            type: 'boolean',
+            default: false
+        })
+
+        yargs.options('concurrency', {
+            alias: 'c',
+            type: 'number',
+            default: Infinity
+        })
+    },
 
     handler: async(args) => {
-        const { domain } = args
+        let { header } = args
+
+        const { wildcard, retry, timeout, unique, summary, concurrency, domain } = args
 
         const { Scheduler } = require('../lib/scheduler')
         const { listCommonCrawURIs } = require('../lib/commoncraw')
         const { listWebArchiveURIs } = require('../lib/webarchive')
         const { listAlienvaultURIs } = require('../lib/alianvault')
 
-        const scheduler = new Scheduler()
+        const headers = {}
+
+        if (header) {
+            if (!Array.isArray(header)) {
+                header = [header]
+            }
+
+            for (let entry of header) {
+                let [name = '', value = ''] = entry.split(':', 1)
+
+                name = name.trim() || entry
+                value = value.trim() || ''
+
+                if (headers[name]) {
+                    if (!Array.isArray(headers[name])) {
+                        headers[name] = [headers[name]]
+                    }
+
+                    headers[name].push(value)
+                }
+                else {
+                    headers[name] = value
+                }
+            }
+        }
+
+        const scheduler = new Scheduler({ maxConcurrent: concurrency })
 
         const options = {
             scheduler,
+            headers,
+            wildcard,
+            retry,
+            timeout
+        }
 
-            wildcard: '*.',
-            headers: {},
-            retry: 5,
-            timeout: 30000,
+        let processUrl
+
+        if (unique) {
+            const hash = {}
+
+            processUrl = (url) => {
+                if (!hash[url]) {
+                    console.log(url)
+
+                    hash[url] = 1
+                }
+            }
+        }
+        else {
+            processUrl = (url) => {
+                console.log(url)
+            }
+        }
+
+        let processSummary
+
+        if (summary) {
+            let count = 0
+
+            processUrl = ((processUrl) => {
+                return (url) => {
+                    count += 1
+
+                    return processUrl(url)
+                }
+            })(processUrl)
+
+            processSummary = () => {
+                console.info(`count: ${count}`)
+            }
+        }
+        else {
+            processSummary = () => {}
         }
 
         await Promise.all(Object.entries({ listCommonCrawURIs, listWebArchiveURIs, listAlienvaultURIs }).map(async([name, func]) => {
             try {
                 for await (let url of func(domain, options)) {
-                    console.log(url)
+                    processUrl(url)
                 }
             }
             catch (e) {
@@ -36,5 +146,7 @@ exports.yargs = {
                 }
             }
         }))
+
+        processSummary()
     }
 }
