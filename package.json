@@ -1,0 +1,49 @@
+{
+  "name": "@pown/lau",
+  "version": "2.0.0",
+  "description": "Pownage guaranteed",
+  "main": "lib/index.js",
+  "scripts": {
+    "lau": "POWN_ROOT=. pown-cli lau",
+    "script": "POWN_ROOT=. pown-cli script",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pownjs/pown-lau.git"
+  },
+  "keywords": [
+    "exploit",
+    "framework"
+  ],
+  "author": "pdp <pdp@gnucitizen.org>",
+  "contributors": [],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pownjs/pown-lau/issues"
+  },
+  "homepage": "https://github.com/pownjs/pown-lau#readme",
+  "devDependencies": {
+    "@pown/cli": "^2.20.0",
+    "@pown/script": "^2.10.1",
+    "@pown/toolchain": "^2.0.0"
+  },
+  "dependencies": {
+    "@pown/request": "^2.12.2"
+  },
+  "pown": {
+    "commands": [
+      "commands/lau.js"
+    ]
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "extends": "./.babelrc"
+        }
+      ]
+    ]
+  }
+}
