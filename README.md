@@ -33,13 +33,19 @@ Install Pown first as usual:
 $ npm install -g pown@latest
 ```
 
+Install lau:
+
+```sh
+$ pown modules install @pown/lau
+```
+
 Invoke directly from Pown:
 
 ```sh
 $ pown lau
 ```
 
-### Library Use
+### Standalone Use
 
 Install this module locally from the root of your project:
 
