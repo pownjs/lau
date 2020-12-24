@@ -25,7 +25,7 @@ This tool is part of [secapps.com](https://secapps.com) open-source initiative.
 
 ## Quickstart
 
-This tool is meant to be used as part of [Pown.js](https://github.com/pownjs/pown) but it can be invoked separately as an independent tool.
+This tool is meant to be used as part of [Pown.js](https://github.com/pownjs/pown), but it can be invoked separately as an independent tool.
 
 Install Pown first as usual:
 
