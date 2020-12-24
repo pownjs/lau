@@ -50,7 +50,13 @@ exports.yargs = {
     handler: async(args) => {
         let { header } = args
 
-        const { wildcard, retry, timeout, unique, summary, concurrency, domain } = args
+        const { wildcard, retry, timeout, unique, summary, concurrency, domain: maybeDomain } = args
+
+        let domain = maybeDomain.trim()
+
+        if (/^https?:\/\//i.test(domain)) {
+            domain = require('url').parse(domain).hostname
+        }
 
         const { Scheduler } = require('../lib/scheduler')
         const { listCommonCrawURIs } = require('../lib/commoncraw')
