@@ -4,53 +4,65 @@ exports.yargs = {
 
     builder: (yargs) => {
         yargs.options('header', {
-            alias: 'H',
+            alias: ['H'],
             type: 'string',
             describe: 'Custom header'
         })
 
         yargs.options('wildcard', {
-            alias: 'w',
+            alias: ['w'],
             type: 'string',
             describe: 'Domain wildcard',
             default: '*.'
         })
 
         yargs.options('retry', {
-            alias: 'r',
+            alias: ['r'],
             type: 'number',
             default: 5
         })
 
         yargs.options('timeout', {
-            alias: 't',
+            alias: ['t'],
             type: 'number',
             default: 30000
         })
 
+        yargs.options('whole', {
+            alias: ['l'],
+            type: 'boolean',
+            default: true
+        })
+
         yargs.options('unique', {
-            alias: 'u',
+            alias: ['u'],
             type: 'boolean',
             default: false
         })
 
         yargs.options('summary', {
-            alias: 's',
+            alias: ['s'],
             type: 'boolean',
             default: false
         })
 
         yargs.options('concurrency', {
-            alias: 'c',
+            alias: ['c'],
             type: 'number',
             default: Infinity
+        })
+
+        yargs.options('filter-extensions', {
+            alias: ['extensions', 'extension'],
+            type: 'string',
+            default: ''
         })
     },
 
     handler: async(args) => {
         let { header } = args
 
-        const { wildcard, retry, timeout, unique, summary, concurrency, domain: maybeDomain } = args
+        const { wildcard, retry, timeout, whole, unique, summary, concurrency, filterExtensions, domain: maybeDomain } = args
 
         let domain = maybeDomain.trim()
 
@@ -58,10 +70,8 @@ exports.yargs = {
             domain = require('url').parse(domain).hostname
         }
 
+        const { listURIs } = require('../lib/modules')
         const { Scheduler } = require('../lib/scheduler')
-        const { listCommonCrawURIs } = require('../lib/commoncraw')
-        const { listWebArchiveURIs } = require('../lib/webarchive')
-        const { listAlienvaultURIs } = require('../lib/alianvault')
 
         const headers = {}
 
@@ -99,23 +109,48 @@ exports.yargs = {
             timeout
         }
 
-        let processUrl
+        let processUrl = (url) => url
+
+        if (!whole) {
+            const url = require('url')
+
+            processUrl = ((processUrl) => {
+                return (uri) => {
+                    uri = processUrl(uri)
+
+                    const parts = url.parse(uri)
+
+                    parts.search = ''
+                    parts.query = ''
+
+                    return url.format(parts)
+                }
+            })(processUrl)
+        }
 
         if (unique) {
             const hash = {}
 
-            processUrl = (url) => {
-                if (!hash[url]) {
-                    console.log(url)
+            processUrl = ((processUrl) => {
+                return (url) => {
+                    url = processUrl(url)
 
-                    hash[url] = 1
+                    if (!hash[url]) {
+                        console.log(url)
+
+                        hash[url] = 1
+                    }
                 }
-            }
+            })(processUrl)
         }
         else {
-            processUrl = (url) => {
-                console.log(url)
-            }
+            processUrl = ((processUrl) => {
+                return (url) => {
+                    url = processUrl(url)
+
+                    console.log(url)
+                }
+            })(processUrl)
         }
 
         let processSummary
@@ -139,19 +174,29 @@ exports.yargs = {
             processSummary = () => {}
         }
 
-        await Promise.all(Object.entries({ listCommonCrawURIs, listWebArchiveURIs, listAlienvaultURIs }).map(async([name, func]) => {
-            try {
-                for await (let url of func(domain, options)) {
-                    processUrl(url)
-                }
+        let filter
+
+        if (filterExtensions) {
+            const lookupExtension = filterExtensions.split(/\|/g).map(e => e.trim()).filter(e => e).map(e => e.startsWith('.') ? e : `.${e}`)
+
+            const url = require('url')
+            const path = require('path')
+
+            filter = (uri) => {
+                const { pathname } = url.parse(uri)
+
+                return lookupExtension.includes(path.extname(pathname))
             }
-            catch (e) {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.error(new Error(`Listing resources with ${name} failed`))
-                    console.error(e)
-                }
+        }
+        else {
+            filter = () => true
+        }
+
+        for await (let url of listURIs(domain, options)) {
+            if (filter(url)) {
+                processUrl(url)
             }
-        }))
+        }
 
         processSummary()
     }
