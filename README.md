@@ -75,13 +75,15 @@ pown lau <domain>
 List all URLs
 
 Options:
-  --version          Show version number  [boolean]
-  --help             Show help  [boolean]
-  --header, -H       Custom header  [string]
-  --wildcard, -w     Domain wildcard  [string] [default: "*."]
+  --version                                       Show version number  [boolean]
+  --help                                          Show help  [boolean]
+  --header, -H                                    Custom header  [string]
+  --wildcard, -w                                  Domain wildcard  [string] [default: "*."]
   --retry, -r  [number] [default: 5]
   --timeout, -t  [number] [default: 30000]
+  --pdp, -l  [boolean] [default: false]
   --unique, -u  [boolean] [default: false]
   --summary, -s  [boolean] [default: false]
   --concurrency, -c  [number] [default: Infinity]
+  --filter-extensions, --extensions, --extension  [string] [default: ""]
 ```
