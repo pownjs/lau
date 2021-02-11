@@ -28,10 +28,10 @@ exports.yargs = {
             default: 30000
         })
 
-        yargs.options('whole', {
+        yargs.options('pdp', {
             alias: ['l'],
             type: 'boolean',
-            default: true
+            default: false
         })
 
         yargs.options('unique', {
@@ -62,7 +62,7 @@ exports.yargs = {
     handler: async(args) => {
         let { header } = args
 
-        const { wildcard, retry, timeout, whole, unique, summary, concurrency, filterExtensions, domain: maybeDomain } = args
+        const { wildcard, retry, timeout, pdp, unique, summary, concurrency, filterExtensions, domain: maybeDomain } = args
 
         let domain = maybeDomain.trim()
 
@@ -111,7 +111,7 @@ exports.yargs = {
 
         let processUrl = (url) => url
 
-        if (!whole) {
+        if (pdp) {
             processUrl = ((processUrl) => {
                 return (url) => {
                     url = processUrl(url)
