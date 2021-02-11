@@ -112,18 +112,12 @@ exports.yargs = {
         let processUrl = (url) => url
 
         if (!whole) {
-            const url = require('url')
-
             processUrl = ((processUrl) => {
-                return (uri) => {
-                    uri = processUrl(uri)
+                return (url) => {
+                    url = processUrl(url)
+                    url = url.replace(/[?#].*/, '')
 
-                    const parts = url.parse(uri)
-
-                    parts.search = ''
-                    parts.query = ''
-
-                    return url.format(parts)
+                    return url
                 }
             })(processUrl)
         }
