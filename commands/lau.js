@@ -60,6 +60,10 @@ exports.yargs = {
     },
 
     handler: async(args) => {
+        const { Scheduler } = require('@pown/request/lib/scheduler')
+
+        const { listURIs } = require('../lib/modules')
+
         let { header } = args
 
         const { wildcard, retry, timeout, pdp, unique, summary, concurrency, filterExtensions, domain: maybeDomain } = args
@@ -69,9 +73,6 @@ exports.yargs = {
         if (/^https?:\/\//i.test(domain)) {
             domain = require('url').parse(domain).hostname
         }
-
-        const { listURIs } = require('../lib/modules')
-        const { Scheduler } = require('../lib/scheduler')
 
         const headers = {}
 
