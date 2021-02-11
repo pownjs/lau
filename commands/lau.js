@@ -99,9 +99,12 @@ exports.yargs = {
             }
         }
 
+        const logger = console
+
         const scheduler = new Scheduler({ maxConcurrent: concurrency })
 
         const options = {
+            logger,
             scheduler,
             headers,
             wildcard,
