@@ -66,7 +66,7 @@ const buildTool = (name, getLister) => {
             yargs.options('output-type', {
                 alias: ['o', 'output'],
                 type: 'string',
-                choices: ['text', 'json-request'],
+                choices: ['text', 'json', 'json-request'],
                 default: 'text'
             })
 
@@ -159,9 +159,15 @@ const buildTool = (name, getLister) => {
 
             let printUrl = (url) => console.log(url)
 
+            if (outputType === 'json') {
+                printUrl = ((printUrl) => {
+                    return (url) => {
+                        printUrl(JSON.stringify({ url }))
+                    }
+                })(printUrl)
+            }
+            else
             if (outputType === 'json-request') {
-                const hash = {}
-
                 printUrl = ((printUrl) => {
                     return (uri) => {
                         printUrl(JSON.stringify({ uri, type: `lau:${name}`, info: { lau: { wildcard, domain } } }))
