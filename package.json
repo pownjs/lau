@@ -37,10 +37,7 @@
   },
   "pown": {
     "commands": [
-      "commands/lau.js",
-      "commands/alienvault.js",
-      "commands/webarchive.js",
-      "commands/commoncrawl.js"
+      "commands/lau"
     ]
   },
   "browserify": {

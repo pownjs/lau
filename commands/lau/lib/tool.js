@@ -1,7 +1,7 @@
 const buildTool = (name, getLister) => {
     return {
         command: `${name} <domain>`,
-        describe: 'List all URLs',
+        describe: `List all URLs: ${name}`,
 
         builder: (yargs) => {
             yargs.options('header', {
