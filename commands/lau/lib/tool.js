@@ -4,17 +4,17 @@ const buildTool = (name, getLister) => {
         describe: `List all URLs: ${name}`,
 
         builder: (yargs) => {
-            yargs.options('header', {
-                alias: ['H'],
-                type: 'string',
-                describe: 'Custom header'
-            })
-
             yargs.options('wildcard', {
                 alias: ['w'],
                 type: 'string',
                 describe: 'Domain wildcard',
                 default: '*.'
+            })
+
+            yargs.options('filter', {
+                alias: ['f'],
+                type: 'string',
+                default: 'statuscode:200'
             })
 
             yargs.options('from', {
@@ -29,6 +29,20 @@ const buildTool = (name, getLister) => {
                 type: 'string',
                 describe: 'To data range',
                 default: ''
+            })
+
+            yargs.options('order', {
+                alias: ['O'],
+                type: 'string',
+                describe: 'Order',
+                choices: ['desc', 'asc'],
+                default: 'desc'
+            })
+
+            yargs.options('header', {
+                alias: ['H'],
+                type: 'string',
+                describe: 'Custom header'
             })
 
             yargs.options('retry', {
@@ -73,14 +87,8 @@ const buildTool = (name, getLister) => {
                 default: Infinity
             })
 
-            yargs.options('filter', {
-                alias: ['f'],
-                type: 'string',
-                default: 'statuscode:200'
-            })
-
             yargs.options('filter-extensions', {
-                alias: ['extensions', 'extension'],
+                alias: ['extensions', 'filter-extension', 'extension'],
                 type: 'string',
                 default: ''
             })
@@ -89,9 +97,7 @@ const buildTool = (name, getLister) => {
         handler: async(args) => {
             const { Scheduler } = require('@pown/request/lib/scheduler')
 
-            let { header } = args
-
-            const { wildcard, from, to, retry, timeout, pdp, maxResults, unique, summary, concurrency, filter, filterExtensions, domain: maybeDomain } = args
+            const { wildcard, filter, from, to, order, header, retry, timeout, pdp, maxResults, unique, summary, concurrency, filterExtensions, domain: maybeDomain } = args
 
             let domain = maybeDomain.trim()
 
@@ -132,10 +138,13 @@ const buildTool = (name, getLister) => {
             const options = {
                 logger,
                 scheduler,
+
                 wildcard,
                 filter,
                 from,
                 to,
+                order,
+
                 headers,
                 retry,
                 timeout
