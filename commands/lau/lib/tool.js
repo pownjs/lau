@@ -57,12 +57,6 @@ const buildTool = (name, getLister) => {
                 default: 30000
             })
 
-            yargs.options('pdp', {
-                alias: ['l'],
-                type: 'boolean',
-                default: false
-            })
-
             yargs.options('max-results', {
                 alias: ['m', 'max'],
                 type: 'number',
@@ -71,6 +65,12 @@ const buildTool = (name, getLister) => {
 
             yargs.options('unique', {
                 alias: ['u'],
+                type: 'boolean',
+                default: false
+            })
+
+            yargs.options('pdp', {
+                alias: ['l'],
                 type: 'boolean',
                 default: false
             })
@@ -97,7 +97,7 @@ const buildTool = (name, getLister) => {
         handler: async(args) => {
             const { Scheduler } = require('@pown/request/lib/scheduler')
 
-            const { wildcard, filter, from, to, order, header, retry, timeout, pdp, maxResults, unique, summary, concurrency, filterExtensions, domain: maybeDomain } = args
+            const { wildcard, filter, from, to, order, header, retry, timeout, maxResults, unique, pdp, summary, concurrency, filterExtensions, domain: maybeDomain } = args
 
             let domain = maybeDomain.trim()
 
@@ -150,40 +150,28 @@ const buildTool = (name, getLister) => {
                 timeout
             }
 
-            let processUrl = (url) => url
-
-            if (pdp) {
-                processUrl = ((processUrl) => {
-                    return (url) => {
-                        url = processUrl(url)
-                        url = url.replace(/[?#].*/, '')
-
-                        return url
-                    }
-                })(processUrl)
-            }
+            let processUrl = (url) => console.log(url)
 
             if (unique) {
                 const hash = {}
 
                 processUrl = ((processUrl) => {
                     return (url) => {
-                        url = processUrl(url)
-
                         if (!hash[url]) {
-                            console.log(url)
+                            processUrl(url)
 
                             hash[url] = 1
                         }
                     }
                 })(processUrl)
             }
-            else {
+
+            if (pdp) {
                 processUrl = ((processUrl) => {
                     return (url) => {
-                        url = processUrl(url)
+                        url = url.replace(/[?#].*/, '')
 
-                        console.log(url)
+                        return processUrl(url)
                     }
                 })(processUrl)
             }
