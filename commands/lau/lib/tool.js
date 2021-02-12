@@ -63,6 +63,13 @@ const buildTool = (name, getLister) => {
                 default: Infinity
             })
 
+            yargs.options('output-type', {
+                alias: ['o', 'output'],
+                type: 'string',
+                choices: ['text', 'json-request'],
+                default: 'text'
+            })
+
             yargs.options('unique', {
                 alias: ['u'],
                 type: 'boolean',
@@ -97,7 +104,7 @@ const buildTool = (name, getLister) => {
         handler: async(args) => {
             const { Scheduler } = require('@pown/request/lib/scheduler')
 
-            const { wildcard, filter, from, to, order, header, retry, timeout, maxResults, unique, pdp, summary, concurrency, filterExtensions, domain: maybeDomain } = args
+            const { wildcard, filter, from, to, order, header, retry, timeout, maxResults, outputType, unique, pdp, summary, concurrency, filterExtensions, domain: maybeDomain } = args
 
             let domain = maybeDomain.trim()
 
@@ -150,51 +157,61 @@ const buildTool = (name, getLister) => {
                 timeout
             }
 
-            let processUrl = (url) => console.log(url)
+            let printUrl = (url) => console.log(url)
+
+            if (outputType === 'json-request') {
+                const hash = {}
+
+                printUrl = ((printUrl) => {
+                    return (uri) => {
+                        printUrl(JSON.stringify({ uri, type: `lau:${name}`, info: { lau: { wildcard, domain } } }))
+                    }
+                })(printUrl)
+            }
 
             if (unique) {
                 const hash = {}
 
-                processUrl = ((processUrl) => {
+                printUrl = ((printUrl) => {
                     return (url) => {
                         if (!hash[url]) {
-                            processUrl(url)
+                            printUrl(url)
 
                             hash[url] = 1
                         }
                     }
-                })(processUrl)
+                })(printUrl)
             }
 
             if (pdp) {
-                processUrl = ((processUrl) => {
+                printUrl = ((printUrl) => {
                     return (url) => {
                         url = url.replace(/[?#].*/, '')
 
-                        return processUrl(url)
+                        return printUrl(url)
                     }
-                })(processUrl)
+                })(printUrl)
             }
 
             let count = 0
 
-            processUrl = ((processUrl) => {
+            printUrl = ((printUrl) => {
                 return (url) => {
                     count += 1
 
-                    return processUrl(url)
+                    return printUrl(url)
                 }
-            })(processUrl)
+            })(printUrl)
 
-            let processSummary
+            let printSummary
 
             if (summary) {
-                processSummary = () => {
+                printSummary = () => {
                     console.info(`count: ${count}`)
                 }
             }
             else {
-                processSummary = () => {}
+                printSummary = () => {}
             }
 
             let localFilter
@@ -219,7 +236,7 @@ const buildTool = (name, getLister) => {
 
             for await (let url of listURIs(domain, options)) {
                 if (localFilter(url)) {
-                    processUrl(url)
+                    printUrl(url)
                 }
 
                 if (count >= maxResults) {
@@ -227,7 +244,7 @@ const buildTool = (name, getLister) => {
                 }
             }
 
-            processSummary()
+            printSummary()
         }
     }
 }
