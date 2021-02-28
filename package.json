@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/pownjs/pown-lau#readme",
   "devDependencies": {
-    "@pown/cli": "^2.27.1",
+    "@pown/cli": "^2.28.0",
     "@pown/script": "^2.15.0",
     "@pown/toolchain": "^2.0.0"
   },
