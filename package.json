@@ -9,7 +9,7 @@
     "webarchive": "POWN_ROOT=. pown-cli webarchive",
     "commoncrawl": "POWN_ROOT=. pown-cli commoncrawl",
     "script": "POWN_ROOT=. pown-cli script",
-    "test": "mocha"
+    "test": "NODE_ENV=test npx mocha@latest"
   },
   "repository": {
     "type": "git",
