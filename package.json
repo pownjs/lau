@@ -4,6 +4,7 @@
   "description": "Pownage guaranteed",
   "main": "lib/index.js",
   "scripts": {
+    "usage": "POWN_ROOT=. pown-cli lau --help",
     "lau": "POWN_ROOT=. pown-cli lau",
     "alienvault": "POWN_ROOT=. pown-cli alienvault",
     "webarchive": "POWN_ROOT=. pown-cli webarchive",
