@@ -28,26 +28,15 @@
   "homepage": "https://github.com/pownjs/pown-lau#readme",
   "devDependencies": {
     "@pown/cli": "^2.34.0",
-    "@pown/script": "^2.20.1",
-    "@pown/toolchain": "^2.5.0"
+    "@pown/script": "^2.20.1"
   },
   "dependencies": {
-    "@pown/async": "^2.14.0",
-    "@pown/request": "^2.26.2"
+    "@pown/async": "^2.17.0",
+    "@pown/request": "^2.26.3"
   },
   "pown": {
     "commands": [
       "commands/lau"
-    ]
-  },
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "extends": "./.babelrc"
-        }
-      ]
     ]
   }
 }
